@@ -1,0 +1,135 @@
+<?xml version="1.0" encoding="utf-8"?>
+<search>
+  <entry>
+    <title>利用方块状态实现自定义材质的方块</title>
+    <url>/2023/03/15/minecraft-custom-block/</url>
+    <content><![CDATA[<h2 id="简介"><a href="#简介" class="headerlink" title="简介"></a>简介</h2><p>在Minecraft 中，放置在世界里的方块有个非常重要的性质，称为方块状态，有以下特征和作用</p>
+<ul>
+<li><p>一个方块可能有1个或者多个状态，方块状态是由方块的属性 <code>Property</code> 决定的，属性可能有0个或者多个，某些方块比如石头、泥土它们是没有任何属性的，所以方块状态只有一种，具有属性的方块往往方块状态存在多个。</p>
+</li>
+<li><p>决定客户端显示的方块材质和方块的功能。</p>
+</li>
+</ul>
+<p>其中，决定客户端显示的方块材质这个特性就是我们要利用的东西，很好理解，比如原版种植在田地里的作物，比如小麦方块，就有着好几种材质，在不同的生长阶段显示的材质就不同。</p>
+<h2 id="方块状态"><a href="#方块状态" class="headerlink" title="方块状态"></a>方块状态</h2><p>进入游戏，按 <code>F3</code> 打开信息显示，用十字光标选中某一个方块，就能在屏幕的右下角查看到这个方块目前的状态</p>
+<p><img src="/2023/03/15/minecraft-custom-block/blockstate.png" alt="音符盒的方块状态"></p>
+<p>比如音符盒方块，就有着三种属性，分别为instrument，note，power，以下为音符盒方块状态表，数据来自<a href="https://minecraft.fandom.com/zh/wiki/%E9%9F%B3%E7%AC%A6%E7%9B%92#%E6%96%B9%E5%9D%97%E7%8A%B6%E6%80%81">wiki</a></p>
+<table>
+<thead>
+<tr>
+<th>名称</th>
+<th>默认值</th>
+<th>接受值</th>
+<th>描述</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>instrument</strong></td>
+<td><code>harp</code></td>
+<td><code>harp</code> <code>basedrum</code> <code>snare</code> <code>hat</code> <code>bass</code> <code>flute</code> <code>bell</code> <code>guitar</code> <code>chime</code> <code>xylophone</code> <code>iron_xylophone</code> <code>cow_bell</code> <code>didgeridoo</code> <code>bit</code> <code>banjo</code> <code>pling</code></td>
+<td>乐器</td>
+</tr>
+<tr>
+<td><strong>note</strong></td>
+<td><code>0</code></td>
+<td><code>0—24</code></td>
+<td>音高</td>
+</tr>
+<tr>
+<td><strong>powered</strong></td>
+<td><code>false</code></td>
+<td><code>true</code> <code>false</code></td>
+<td>是否激活</td>
+</tr>
+</tbody></table>
+<p>一个方块的不同状态可以显示不同的模型材质，原版有很多方块不同的状态显示相同的材质，这些状态是可以拿来利用的，就拿音符盒来说，instrument有16种，note有25种，power有2种，可以组成800种状态，也就是说音符盒方块可以实现最多16x25x2&#x3D;800种材质的方块。</p>
+<h2 id="自定义方块材质"><a href="#自定义方块材质" class="headerlink" title="自定义方块材质"></a>自定义方块材质</h2><p>想要自定义方块材质，就需要了解资源包的 <a href="https://minecraft.fandom.com/zh/wiki/%E8%B5%84%E6%BA%90%E5%8C%85#%E6%96%87%E4%BB%B6%E7%BB%93%E6%9E%84">文件结构</a>,这里提供了一个<a href="custom.zip">demo</a>给大家参考。</p>
+<p>其中包含了一个自定义的材质模型以及运用，材质包的制作技术不是本文的重点。</p>
+<p>通过了资源包文件可以了解到其中有个 blockstate 文件夹用来存放不同类型方块的方块状态材质。</p>
+<p>打开<code>note_block.json</code>发现如下代码。</p>
+<figure class="highlight json"><table><tr><td class="code"><pre><code class="hljs json"><span class="hljs-punctuation">&#123;</span><br>  <span class="hljs-attr">&quot;variants&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">&#123;</span><br>    <span class="hljs-attr">&quot;&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">&#123;</span><br>      <span class="hljs-attr">&quot;model&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;minecraft:block/note_block&quot;</span><br>    <span class="hljs-punctuation">&#125;</span><br>  <span class="hljs-punctuation">&#125;</span><br><span class="hljs-punctuation">&#125;</span><br></code></pre></td></tr></table></figure>
+
+<p>可以发现音符盒所有的状态都使用了<code>note_block</code>这个材质，我们可以参考其他的方块比如<code>tripwire</code>它的代码是这样的</p>
+<figure class="highlight json"><table><tr><td class="code"><pre><code class="hljs json"><span class="hljs-punctuation">&#123;</span><br>  <span class="hljs-attr">&quot;variants&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">&#123;</span><br>    <span class="hljs-attr">&quot;attached=false,east=false,north=false,south=false,west=false&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">&#123;</span><br>      <span class="hljs-attr">&quot;model&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;minecraft:block/tripwire_ns&quot;</span><br>    <span class="hljs-punctuation">&#125;</span><span class="hljs-punctuation">,</span><br>    <span class="hljs-attr">&quot;attached=false,east=false,north=false,south=false,west=true&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">&#123;</span><br>      <span class="hljs-attr">&quot;model&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;minecraft:block/tripwire_n&quot;</span><span class="hljs-punctuation">,</span><br>      <span class="hljs-attr">&quot;y&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-number">270</span><br>    <span class="hljs-punctuation">&#125;</span><span class="hljs-punctuation">,</span><br>    <span class="hljs-attr">&quot;attached=false,east=false,north=false,south=true,west=false&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">&#123;</span><br>      <span class="hljs-attr">&quot;model&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;minecraft:block/tripwire_n&quot;</span><span class="hljs-punctuation">,</span><br>      <span class="hljs-attr">&quot;y&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-number">180</span><br>    <span class="hljs-punctuation">&#125;</span><br>    <span class="hljs-comment">// ....</span><br>  <span class="hljs-punctuation">&#125;</span><br></code></pre></td></tr></table></figure>
+
+<p>发现了<code>tripwire</code>的每种状态都有一个材质，我们也可以对音符盒进行这样的修改，代码如下</p>
+<figure class="highlight json"><table><tr><td class="code"><pre><code class="hljs json"><span class="hljs-punctuation">&#123;</span><br>    <span class="hljs-attr">&quot;variants&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">&#123;</span><br>        <span class="hljs-attr">&quot;instrument=harp,note=0,powered=false&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-punctuation">&#123;</span><br>            <span class="hljs-attr">&quot;model&quot;</span><span class="hljs-punctuation">:</span> <span class="hljs-string">&quot;custom/block/snow_brick&quot;</span><br>        <span class="hljs-punctuation">&#125;</span><br>    <span class="hljs-punctuation">&#125;</span><br>    <span class="hljs-comment">//....</span><br><span class="hljs-punctuation">&#125;</span><br></code></pre></td></tr></table></figure>
+
+<p>以上的模型来自于<a href="custom.zip">demo</a>，加载材质后发现方块状态为<code>harp</code> <code>0</code> <code>false</code>音符盒的材质发生了改变</p>
+<p><img src="/2023/03/15/minecraft-custom-block/custom-snow-brick.png" alt="通过音符盒实现的雪砖方块"></p>
+<p>于是我们就可以发现，原版有很多类似的方块可以用来魔改，比如有<code>age</code>属性的甘蔗，发光浆果藤，缠怨藤，垂泪藤，海带以及其他属性的树叶，树苗等等。</p>
+<p>但是这里就有个问题了，方块状态除了显示材质以外，还有个很重要的功能，就是决定了方块的功能，比如音符盒的instrument决定了乐器，note决定了音调以及power表示是否被红石充能，如果这些状态被拿来做自定义方块，那么这些方块具有的原版功能岂不是没有用了？</p>
+<p>看似是这样，但是其实是有方法可以做到一部分状态用来显示原版材质和功能，另一部分的状态用来实现自定义方块，怎么样做到呢，让我们来思考。</p>
+<h2 id="思考"><a href="#思考" class="headerlink" title="思考"></a>思考</h2><p>在mc代码的<code>Block</code>类中，有个这样的静态属性</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><code class="hljs java"><span class="hljs-keyword">public</span> <span class="hljs-keyword">static</span> <span class="hljs-keyword">final</span> IdMapper&lt;BlockState&gt; BLOCK_STATE_REGISTRY = <span class="hljs-keyword">new</span> <span class="hljs-title class_">IdMapper</span>&lt;&gt;();<br></code></pre></td></tr></table></figure>
+
+<p>这个属性记录了每种方块状态及其对应的<code>Integer</code>型id，有个很重要的作用就是与客户端通信使用的，<u>似乎就这一个功能</u>。</p>
+<p>在服务端，通过<code>Block.BLOCK_STATE_REGISTRY.getId(blockState)</code>方法可以得到这个方块的id然后发送给客户端。</p>
+<p>客户端通过<code>Block.BLOCK_STATE_REGISTRY.byId(id)</code>方法把id转换为blockstate，反之亦然。</p>
+<p>毕竟通过一个整形的数据来标识方块状态，进行网络传输是非常高效的。</p>
+<p>经过研究发现这个<code>IdMapper</code>可以使多种blockstate具有相同的id，这个特性非常有用。</p>
+<p>想要做到一部分方块状态用来执行原版功能，其余的状态用来做自定义方块，就需要把真实的方块状态隐藏起来，让客户端看到的是一个<strong>假</strong>的方块状态。</p>
+<p>这类方块必须有个特点，就是必须有多个状态显示相同的材质，哪怕其中有的属性会改变方块显示的材质，但只要存在那种属性，不管怎么改变都不会影响方块显示的材质，就能拿来魔改。</p>
+<p>就比如音符盒，它的三种属性（instrument，note，power）的改变都不会引起方块材质的改变，有800种状态却显示的是相同的材质，我们可以拿其中的1种状态用来显示原版的材质，并且执行原版的功能，那么剩下的799种就是可以拿来使用的状态。</p>
+<p>想要做到这一点就需要给音符盒方块添加三个额外属性，称为<strong>假属性</strong>，这三个属性的数据类型和真实属性的数据类型对应，只不过命名不同，而且这个命名还很讲究，比如(ainstrument, bnote, cpower)。</p>
+<p>为什么要这样命名呢，因为属性最后是通过<a href="https://baike.baidu.com/item/%E6%9E%9A%E4%B8%BE/2101055">枚举</a>来得到不同的方块状态，属性的顺序会决定blockstate在<code>IdMapper</code>中的id顺序，而属性的顺序是由存到hash表当中的属性名决定的，我们需要满足两个条件</p>
+<ul>
+<li>所有<strong>假属性</strong>必须排列在真属性之前</li>
+<li><strong>假属性</strong>之间的顺序必须和真属性之间的顺序相同</li>
+</ul>
+<p>之所以要满足这些条件，是为了方便后续魔改方块id注册机制。</p>
+<p>这样音符盒方块就有了6种属性，按名称的hash顺序分别为ainstrument、bnote、cpower、instrument、note、power。</p>
+<p>然后就需要对音符盒方块状态的注册机制进行修改了，我们需要用额外添加的<strong>假属性</strong>产生的状态对之前存在的状态进行替换，</p>
+<p>比如instrument、note、power分别为HARP、0、false这种状态的方块，在<code>IdMapper</code>中的id为282（版本1.18.1），HARP、0、true则为289，我们需要把添加<strong>假属性</strong>后的方块，状态ainstrument&#x3D;HARP、bnote&#x3D;0、cpower&#x3D;false所对应的800种状态的id注册为282，ainstrument&#x3D;HARP、bnote&#x3D;0、cpower&#x3D;true，所对应的注册为289以此类推，这样就可以达到让客户端看到的是<strong>假</strong>的方块状态，而真实的状态，用于实现功能的状态，被隐藏起来了。</p>
+<h2 id="魔改方块属性"><a href="#魔改方块属性" class="headerlink" title="魔改方块属性"></a>魔改方块属性</h2><p>看起来似乎很难实现，但我们可以通过魔改服务端代码来实现这个效果，魔改服务端的技术有很多，比如Paper项目组的 <a href="https://github.com/PaperMC/paperweight">paperweight</a>，以及SpigotMC的 <a href="https://www.spigotmc.org/wiki/buildtools/">BuildTools</a>，服务端魔改技术本文不作重点。</p>
+<p>这里就拿上文的音符盒来举例，我们找到音符盒的mc源代码，这里只例举了核心代码。</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><code class="hljs java"><span class="hljs-keyword">public</span> <span class="hljs-keyword">class</span> <span class="hljs-title class_">NoteBlock</span> <span class="hljs-keyword">extends</span> <span class="hljs-title class_">Block</span> &#123;<br><br>    <span class="hljs-keyword">public</span> <span class="hljs-keyword">static</span> <span class="hljs-keyword">final</span> EnumProperty&lt;NoteBlockInstrument&gt; INSTRUMENT = EnumProperty.create(<span class="hljs-string">&quot;instrument&quot;</span>, NoteBlockInstrument.class);<br>    <span class="hljs-keyword">public</span> <span class="hljs-keyword">static</span> <span class="hljs-keyword">final</span> <span class="hljs-type">BooleanProperty</span> <span class="hljs-variable">POWERED</span> <span class="hljs-operator">=</span> BooleanProperty.create(<span class="hljs-string">&quot;powered&quot;</span>);<br>    <span class="hljs-keyword">public</span> <span class="hljs-keyword">static</span> <span class="hljs-keyword">final</span> <span class="hljs-type">IntegerProperty</span> <span class="hljs-variable">NOTE</span> <span class="hljs-operator">=</span> NOTE = IntegerProperty.create(<span class="hljs-string">&quot;note&quot;</span>, <span class="hljs-number">0</span>, <span class="hljs-number">24</span>);<br>    <br>    <span class="hljs-keyword">public</span> <span class="hljs-title function_">NoteBlock</span><span class="hljs-params">(BlockBehaviour.Properties settings)</span> &#123;<br>        <span class="hljs-built_in">super</span>(settings);<br>        <span class="hljs-built_in">this</span>.registerDefaultState(<span class="hljs-built_in">this</span>.stateDefinition.any()<br>                .setValue(INSTRUMENT, NoteBlockInstrument.HARP)<br>                .setValue(NOTE, <span class="hljs-number">0</span>)<br>                .setValue(POWERED, <span class="hljs-literal">false</span>));<br>    &#125;<br>    <br>    <span class="hljs-meta">@Override</span><br>    <span class="hljs-keyword">protected</span> <span class="hljs-keyword">void</span> <span class="hljs-title function_">createBlockStateDefinition</span><span class="hljs-params">(StateDefinition.Builder&lt;Block, BlockState&gt; builder)</span> &#123;<br>        builder.add(INSTRUMENT, POWERED, NOTE);<br>    &#125;<br>&#125;<br></code></pre></td></tr></table></figure>
+
+<p>可以给它添加3个额外的属性，叫做ainstrument，bnote，cpower。</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><code class="hljs java"><span class="hljs-keyword">public</span> <span class="hljs-keyword">class</span> <span class="hljs-title class_">NoteBlock</span> <span class="hljs-keyword">extends</span> <span class="hljs-title class_">Block</span> &#123;<br><br>    <span class="hljs-keyword">public</span> <span class="hljs-keyword">static</span> <span class="hljs-keyword">final</span> EnumProperty&lt;NoteBlockInstrument&gt; FAKE_INSTRUMENT = EnumProperty.create(<span class="hljs-string">&quot;ainstrument&quot;</span>, NoteBlockInstrument.class);<br>    <span class="hljs-keyword">public</span> <span class="hljs-keyword">static</span> <span class="hljs-keyword">final</span> <span class="hljs-type">BooleanProperty</span> <span class="hljs-variable">FAKE_POWERED</span> <span class="hljs-operator">=</span> BooleanProperty.create(<span class="hljs-string">&quot;cpowered&quot;</span>);<br>    <span class="hljs-keyword">public</span> <span class="hljs-keyword">static</span> <span class="hljs-keyword">final</span> <span class="hljs-type">IntegerProperty</span> <span class="hljs-variable">FAKE_NOTE</span> <span class="hljs-operator">=</span> NOTE = IntegerProperty.create(<span class="hljs-string">&quot;bnote&quot;</span>, <span class="hljs-number">0</span>, <span class="hljs-number">24</span>);<br>    <span class="hljs-keyword">public</span> <span class="hljs-keyword">static</span> <span class="hljs-keyword">final</span> EnumProperty&lt;NoteBlockInstrument&gt; INSTRUMENT = EnumProperty.create(<span class="hljs-string">&quot;instrument&quot;</span>, NoteBlockInstrument.class);<br>    <span class="hljs-keyword">public</span> <span class="hljs-keyword">static</span> <span class="hljs-keyword">final</span> <span class="hljs-type">BooleanProperty</span> <span class="hljs-variable">POWERED</span> <span class="hljs-operator">=</span> BooleanProperty.create(<span class="hljs-string">&quot;powered&quot;</span>);<br>    <span class="hljs-keyword">public</span> <span class="hljs-keyword">static</span> <span class="hljs-keyword">final</span> <span class="hljs-type">IntegerProperty</span> <span class="hljs-variable">NOTE</span> <span class="hljs-operator">=</span> NOTE = IntegerProperty.create(<span class="hljs-string">&quot;note&quot;</span>, <span class="hljs-number">0</span>, <span class="hljs-number">24</span>);<br>    <br>    <span class="hljs-keyword">public</span> <span class="hljs-title function_">NoteBlock</span><span class="hljs-params">(BlockBehaviour.Properties settings)</span> &#123;<br>        <span class="hljs-built_in">super</span>(settings);<br>        <span class="hljs-built_in">this</span>.registerDefaultState(<span class="hljs-built_in">this</span>.stateDefinition.any()<br>                .setValue(FAKE_INSTRUMENT, NoteBlockInstrument.HARP)<br>                .setValue(FAKE_NOTE, <span class="hljs-number">0</span>)<br>                .setValue(FAKE_POWERED, <span class="hljs-literal">false</span>));<br>                .setValue(INSTRUMENT, NoteBlockInstrument.HARP)<br>                .setValue(NOTE, <span class="hljs-number">0</span>)<br>                .setValue(POWERED, <span class="hljs-literal">false</span>));<br>    &#125;<br>    <br>    <span class="hljs-meta">@Override</span><br>    <span class="hljs-keyword">protected</span> <span class="hljs-keyword">void</span> <span class="hljs-title function_">createBlockStateDefinition</span><span class="hljs-params">(StateDefinition.Builder&lt;Block, BlockState&gt; builder)</span> &#123;<br>        builder.add(FAKE_INSTRUMENT, FAKE_POWERED, FAKE_NOTE, INSTRUMENT, POWERED, NOTE);<br>    &#125;<br>&#125;<br></code></pre></td></tr></table></figure>
+
+<p>这样就完成了音符盒方块属性的魔改。</p>
+<h2 id="魔改方块状态注册机制"><a href="#魔改方块状态注册机制" class="headerlink" title="魔改方块状态注册机制"></a>魔改方块状态注册机制</h2><p>找到方块状态注册的代码，发现是在<code>Blocks</code>类下的一个静态代码块</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><code class="hljs java"><span class="hljs-keyword">static</span> &#123;<br>	<span class="hljs-keyword">for</span>(Block block : Registry.BLOCK) &#123;<br>		<span class="hljs-keyword">for</span>(BlockState blockState : block.getStateDefinition().getPossibleStates()) &#123;<br>            <span class="hljs-comment">//注册blockstate并分配一个id</span><br>			Block.BLOCK_STATE_REGISTRY.add(blockState);<br>		&#125;<br>		block.getLootTable();<br>    &#125;<br>&#125;<br></code></pre></td></tr></table></figure>
+
+<p>我们需要对音符盒的注册动点手脚,我们在第一层<code>for</code>循环内加入以下代码</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><code class="hljs java"><span class="hljs-keyword">if</span> (block.getClass() == NoteBlock.class) &#123;<br>    <span class="hljs-comment">//键用来存放转换合并后的属性，值用来存放注册过的id</span><br>	Map&lt;Integer, Integer&gt; map = Maps.newHashMap();<br>	<span class="hljs-keyword">for</span>(BlockState blockState : block.getStateDefinition().getPossibleStates()) &#123;<br>        <span class="hljs-comment">//将ainstrument bnote cpowered转换成一个int类型的值，方便map记录</span><br>        <span class="hljs-type">int</span> <span class="hljs-variable">ainstrument</span> <span class="hljs-operator">=</span> blockState.getValue(NoteBlock.FAKE_INSTRUMENT).ordinal();<br>        <span class="hljs-type">int</span> <span class="hljs-variable">bnote</span> <span class="hljs-operator">=</span> blockState.getValue(NoteBlock.FAKE_NOTE);<br>        <span class="hljs-type">boolean</span> <span class="hljs-variable">cpowered</span> <span class="hljs-operator">=</span> blockState.getValue(NoteBlock.FAKE_POWERED);<br>        <span class="hljs-type">int</span> <span class="hljs-variable">key</span> <span class="hljs-operator">=</span> (ainstrument &amp; <span class="hljs-number">63</span>) &lt;&lt; <span class="hljs-number">7</span> | (bnote &amp; <span class="hljs-number">63</span>) &lt;&lt; <span class="hljs-number">1</span> | (cpowered ? <span class="hljs-number">1</span> : <span class="hljs-number">0</span>);<br>        <br>        <span class="hljs-comment">//如果map中存在这个key则取出id直接注册 否则先注册并记录id</span><br>        <span class="hljs-keyword">if</span> (map.containsKey(key)) &#123;<br> 			Block.BLOCK_STATE_REGISTRY.addMapping(blockState, map.get(key));<br> 		&#125; <span class="hljs-keyword">else</span> &#123;<br> 			Block.BLOCK_STATE_REGISTRY.add(blockState);<br>			map.put(key, Block.BLOCK_STATE_REGISTRY.getId(blockState));<br>        &#125;<br>		block.getLootTable();<br> 		<span class="hljs-keyword">continue</span>;<br>&#125;<br></code></pre></td></tr></table></figure>
+
+<p>这样就能达到<strong>假属性</strong>产生的状态对之前存在的状态进行替换的效果。进入到游戏当中，发现不管怎么改变instrument、note、power，F3信息面板中的方块状态都是固定的了，因为真实的属性被隐藏起来了，实际上客户端看到的是我们添加的三种<strong>假属性</strong>，我们只有改变方块的<strong>假属性</strong>时，客户端的显示才会改变。</p>
+<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>随着minecraft的版本更新，未来可能会有更多的方块可以用来实现自定义材质的方块。</p>
+<p>本文讲解了如何通过魔改服务端，和自定义材质包来实现自定义材质的方块而又不损失原版的一些方块特性，其中还存在着一些技术细节，但本文不过多讲述了，仅提供一种思路供读者参考。</p>
+<p>本文所讲解的一些技术，已经是被证明是可行的，但是有很多可以优化的点，比如音符盒方块经过魔改之后，存在着800x800&#x3D;64万种方块状态，其中可能只有800+799&#x3D;1699种状态是有用的，其余的方块状态则没有太大用处，而且会占用部分的服务器内存，减慢服务端启动速度，这些都是可以通过优化来解决的。</p>
+]]></content>
+      <categories>
+        <category>开发</category>
+      </categories>
+      <tags>
+        <tag>Minecraft</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>使玩家看向某个坐标</title>
+    <url>/2023/08/10/player-look-at/</url>
+    <content><![CDATA[<h2 id="简介"><a href="#简介" class="headerlink" title="简介"></a>简介</h2><p>最近在实现一个对话系统，在玩家进入对话状态之后，要使玩家看向与之对话的 NPC，要控制玩家缓慢转头，顺便补了一下向量的知识，记录一下实现过程。</p>
+<h2 id="原理"><a href="#原理" class="headerlink" title="原理"></a>原理</h2><p>通过要看向的地方的坐标减去玩家头部的坐标，就可以得到玩家最终的朝向向量，记作向量A，将玩家当前的朝向向量记作向量B，要使玩家缓慢转头，就需要使向量B向向量A旋转，每次旋转一个比较小的度数，直到两个向量接近重合，于是就需要计算两向量的叉积，得到一个垂直于这两个向量的新向量作为旋转轴，记作向量C，时向量B绕向量C旋转就可以了。</p>
+<h2 id="实现代码"><a href="#实现代码" class="headerlink" title="实现代码"></a>实现代码</h2><p>相机任务</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><code class="hljs java"><span class="hljs-keyword">public</span> <span class="hljs-keyword">class</span> <span class="hljs-title class_">CameraTask</span> <span class="hljs-keyword">extends</span> <span class="hljs-title class_">BukkitRunnable</span> &#123;<br><br>    <span class="hljs-comment">// 每次旋转的角度</span><br>    <span class="hljs-keyword">private</span> <span class="hljs-keyword">static</span> <span class="hljs-keyword">final</span> <span class="hljs-type">float</span> <span class="hljs-variable">ROTATION_ANGEL</span> <span class="hljs-operator">=</span> (<span class="hljs-type">float</span>) Math.toRadians(<span class="hljs-number">5.0F</span>);<br>    <br>    <span class="hljs-comment">// 控制的玩家</span><br>    <span class="hljs-keyword">private</span> <span class="hljs-keyword">final</span> Player player;<br>    <br>    <span class="hljs-comment">// 玩家要看向的坐标</span><br>    <span class="hljs-keyword">private</span> <span class="hljs-keyword">final</span> Location lookAt;<br><br>    <span class="hljs-keyword">public</span> <span class="hljs-title function_">CameraTask</span><span class="hljs-params">(Player player, Location lookAt)</span> &#123;<br>        <span class="hljs-built_in">this</span>.player = player;<br>        <span class="hljs-built_in">this</span>.lookAt = lookAt;<br>    &#125;<br><br>    <span class="hljs-meta">@Override</span><br>    <span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title function_">run</span><span class="hljs-params">()</span> &#123;<br>        <span class="hljs-comment">// 如果玩家死亡或者不在同一个世界则取消</span><br>        <span class="hljs-keyword">if</span> (!player.isValid() || !player.getWorld().equals(lookAt.getWorld())) &#123;<br>            cancel();<br>            <span class="hljs-keyword">return</span>;<br>        &#125;<br>        <br>        <span class="hljs-comment">// 玩家眼睛的坐标</span><br>        <span class="hljs-type">Location</span> <span class="hljs-variable">playerEyeLoc</span> <span class="hljs-operator">=</span> player.getEyeLocation();<br>        <span class="hljs-comment">// 玩家当前的朝向向量</span><br>        <span class="hljs-type">Vector</span> <span class="hljs-variable">playerDir</span> <span class="hljs-operator">=</span> playerEyeLoc.getDirection();<br>        <span class="hljs-comment">// 最终的朝向向量</span><br>        <span class="hljs-type">Vector</span> <span class="hljs-variable">finalDir</span> <span class="hljs-operator">=</span> lookAt.toVector().subtract(playerEyeLoc.toVector());<br><br>        <span class="hljs-comment">// 如果两向量夹角非常小则取消</span><br>        <span class="hljs-type">float</span> <span class="hljs-variable">angle</span> <span class="hljs-operator">=</span> finalDir.angle(playerDir);<br>        <span class="hljs-keyword">if</span> (Math.abs(angle) &lt; <span class="hljs-number">0.0001F</span>) &#123;<br>            cancel();<br>            <span class="hljs-keyword">return</span>;<br>        &#125;<br><br>        <span class="hljs-comment">// 得到两向量的叉积并单位化</span><br>        <span class="hljs-type">Vector</span> <span class="hljs-variable">crossProduct</span> <span class="hljs-operator">=</span> playerDir.getCrossProduct(finalDir).normalize();<br>        <span class="hljs-comment">// 计算得到要看向的向量</span><br>        <span class="hljs-type">Vector</span> <span class="hljs-variable">vector</span> <span class="hljs-operator">=</span> playerDir.rotateAroundNonUnitAxis(crossProduct, Math.min(angle, ROTATION_ANGEL));<br><br>        <span class="hljs-comment">// 改变玩家的朝向</span><br>        player.teleport(player.getLocation().setDirection(vector));<br>    &#125;<br>&#125;<br></code></pre></td></tr></table></figure>
+
+<p>开启任务</p>
+<figure class="highlight java"><table><tr><td class="code"><pre><code class="hljs java"><span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title function_">lookAt</span><span class="hljs-params">(Player player, Location location)</span> &#123;<br>    <span class="hljs-type">CameraTask</span> <span class="hljs-variable">task</span> <span class="hljs-operator">=</span> <span class="hljs-keyword">new</span> <span class="hljs-title class_">CameraTask</span>(player, location);<br>    task.runTaskTimer(TestPlugin.getInstance(), <span class="hljs-number">1L</span>, <span class="hljs-number">1L</span>);<br>&#125;<br></code></pre></td></tr></table></figure>
+
+<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><ul>
+<li>通过这种方法可以实现非常丝滑的玩家转头效果</li>
+<li>只描述了玩家看向某个坐标的大概实现思路，还有一些细节需要自行处理</li>
+<li>没有涉及到一些数学计算公式，是通过类库自带的方法实现的计算，具体自行研究</li>
+</ul>
+]]></content>
+      <categories>
+        <category>开发</category>
+      </categories>
+      <tags>
+        <tag>Minecraft</tag>
+        <tag>Bukkit</tag>
+      </tags>
+  </entry>
+</search>
